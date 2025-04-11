@@ -1,5 +1,7 @@
-fn main() {
-    println!("Hello, world!");
+use pm_lib::Logs;
 
-    println!("{}", pm_lib::add(2, 3))
+fn main() {
+    let log_path = "examples/logs.jsonl";
+    let logs = Logs::from_file(log_path);
+    println!("Logs: {:#?}", logs);
 }
