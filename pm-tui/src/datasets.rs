@@ -2,6 +2,7 @@
 
 use pm_lib::Logs;
 use ratatui::prelude::*;
+use ratatui::widgets::{Block, Padding};
 use ratatui::{
     buffer::Buffer,
     layout::Rect,
@@ -66,6 +67,12 @@ pub fn draw_datasets(logs: &Logs, rect: Rect, buf: &mut Buffer) {
                     format!("{:.2e}", (y_max + y_min) / 2.0),
                     format!("{:.2e}", y_max),
                 ]),
+        )
+        .block(
+            Block::default()
+                .padding(Padding::horizontal(1))
+                .title(logs.file.clone())
+                .title_alignment(Alignment::Center),
         )
         .render(rect, buf);
 }

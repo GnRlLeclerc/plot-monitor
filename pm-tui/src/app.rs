@@ -4,7 +4,7 @@ use std::io;
 
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use pm_lib::Logs;
-use ratatui::{DefaultTerminal, prelude::*, widgets::Paragraph};
+use ratatui::{DefaultTerminal, prelude::*};
 
 use crate::datasets::draw_datasets;
 
@@ -65,12 +65,6 @@ impl App {
 
     /// App rendering function (as a widget)
     fn render(&mut self, area: Rect, buf: &mut Buffer) {
-        let areas = Layout::vertical(vec![Constraint::Length(1), Constraint::Min(0)]).split(area);
-
-        Paragraph::new(self.logs.file.as_str())
-            .centered()
-            .render(areas[0], buf);
-
-        draw_datasets(&self.logs, areas[1], buf);
+        draw_datasets(&self.logs, area, buf);
     }
 }
