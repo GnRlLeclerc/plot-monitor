@@ -5,8 +5,9 @@ use std::io;
 use app::App;
 use pm_lib::Logs;
 
-pub mod app;
-pub mod datasets;
+mod app;
+mod colormap;
+mod datasets;
 
 /// Run the plot-monitor TUI
 pub fn run(logs: Logs) -> io::Result<()> {

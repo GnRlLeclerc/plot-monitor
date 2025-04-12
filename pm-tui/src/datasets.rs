@@ -10,6 +10,8 @@ use ratatui::{
     widgets::{Axis, Chart, Dataset, GraphType},
 };
 
+use crate::colormap::Colormap;
+
 /// Convert a series of points to a dataset
 pub fn to_dataset<'a>(name: &'a str, points: &'a [(f64, f64)]) -> Dataset<'a> {
     Dataset::default()
@@ -26,6 +28,8 @@ pub fn draw_datasets(logs: &Logs, rect: Rect, buf: &mut Buffer) {
     let mut y_min = 0.0_f64;
     let mut y_max = 0.0_f64;
 
+    let mut cmap = Colormap::new();
+
     // Create datasets
     let datasets = logs
         .iter()
@@ -36,12 +40,11 @@ pub fn draw_datasets(logs: &Logs, rect: Rect, buf: &mut Buffer) {
             y_min = y_min.min(points.iter().map(|p| p.1).fold(f64::INFINITY, f64::min));
             y_max = y_max.max(points.iter().map(|p| p.1).fold(f64::NEG_INFINITY, f64::max));
 
-            return to_dataset(name, points);
+            return to_dataset(name, points).style(Style::default().fg(cmap.next()));
         })
         .collect::<Vec<_>>();
 
-    // TODO: compute labels
-    // TODO: colormaps
+    // TODO: compute labels and space them properly
 
     Chart::new(datasets)
         .x_axis(
@@ -53,7 +56,7 @@ pub fn draw_datasets(logs: &Logs, rect: Rect, buf: &mut Buffer) {
         )
         .y_axis(
             Axis::default()
-                .title("Y Axis")
+                .title("Value")
                 .style(Style::default().gray())
                 .bounds([y_min, y_max])
                 .labels([format!("{:5.3}", y_min), format!("{:5.3}", y_max)]),
