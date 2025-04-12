@@ -2,7 +2,7 @@
 
 use pm_lib::Logs;
 use ratatui::prelude::*;
-use ratatui::widgets::{Block, Padding};
+use ratatui::widgets::{Block, Borders, Padding, Paragraph};
 use ratatui::{
     buffer::Buffer,
     layout::Rect,
@@ -31,9 +31,30 @@ pub fn draw_datasets(logs: &Logs, rect: Rect, buf: &mut Buffer) {
 
     let mut cmap = Colormap::new();
 
+    let datasets = logs.iter();
+
+    // If the file is not found, just display an error screen
+    if datasets.is_none() {
+        Paragraph::new("FILE NOT FOUND".bold().red())
+            .alignment(Alignment::Center)
+            .block(
+                Block::default()
+                    .padding(Padding {
+                        left: 1,
+                        right: 1,
+                        top: rect.height / 2,
+                        bottom: 0,
+                    })
+                    .title(logs.file.clone())
+                    .title_alignment(Alignment::Center),
+            )
+            .render(rect, buf);
+        return;
+    }
+    let datasets = datasets.unwrap();
+
     // Create datasets
-    let datasets = logs
-        .iter()
+    let datasets = datasets
         .map(|(name, points)| {
             // Compute bounds
             x_min = x_min.min(points[0].0);
