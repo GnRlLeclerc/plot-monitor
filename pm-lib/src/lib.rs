@@ -9,12 +9,16 @@ use serde_json::Value;
 #[derive(Debug, Clone)]
 pub struct Logs {
     /// Map of data points, stored as (epoch, value) tuples
-    pub points: HashMap<String, Vec<(usize, f64)>>,
+    pub points: HashMap<String, Vec<(f64, f64)>>,
+
+    /// Path to the JSONL file
+    pub file: String,
 }
 
 impl Logs {
-    pub fn from_file(path: &str) -> Logs {
+    pub fn new(path: &str) -> Logs {
         let mut logs = Logs {
+            file: path.to_string(),
             points: HashMap::new(),
         };
 
@@ -53,7 +57,10 @@ impl Logs {
                         _ => None,
                     })
                     .for_each(|(key, value)| {
-                        logs.points.entry(key).or_insert(vec![]).push((i, value));
+                        logs.points
+                            .entry(key)
+                            .or_insert(vec![])
+                            .push((i as f64, value));
                     });
             });
 
