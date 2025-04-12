@@ -6,6 +6,11 @@ use std::{
 
 use serde_json::Value;
 
+mod filter;
+mod iter;
+
+pub use filter::*;
+
 #[derive(Debug, Clone)]
 pub struct Logs {
     /// Map of data points, stored as (epoch, value) tuples
@@ -13,13 +18,17 @@ pub struct Logs {
 
     /// Path to the JSONL file
     pub file: String,
+
+    /// Filter parameters
+    pub filter: FilterOpts,
 }
 
 impl Logs {
-    pub fn new(path: &str) -> Logs {
+    pub fn new(path: &str, filter: FilterOpts) -> Logs {
         let mut logs = Logs {
             file: path.to_string(),
             points: HashMap::new(),
+            filter,
         };
 
         let file = File::open(path).expect("Unable to open file");

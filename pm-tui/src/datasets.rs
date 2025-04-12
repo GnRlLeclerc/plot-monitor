@@ -20,7 +20,6 @@ pub fn to_dataset<'a>(name: &'a str, points: &'a [(f64, f64)]) -> Dataset<'a> {
 }
 
 /// Draw datasets on the given area
-/// TODO: filtering options + span
 pub fn draw_datasets(logs: &Logs, rect: Rect, buf: &mut Buffer) {
     let mut x_min = 0.0_f64;
     let mut x_max = 0.0_f64;
@@ -29,7 +28,6 @@ pub fn draw_datasets(logs: &Logs, rect: Rect, buf: &mut Buffer) {
 
     // Create datasets
     let datasets = logs
-        .points
         .iter()
         .map(|(name, points)| {
             // Compute bounds

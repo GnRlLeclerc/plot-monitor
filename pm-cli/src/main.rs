@@ -1,5 +1,5 @@
 use clap::Parser;
-use pm_lib::Logs;
+use pm_lib::{FilterOpts, Logs};
 
 /// Display mode
 #[derive(Debug, Default, Clone, clap::ValueEnum)]
@@ -31,12 +31,29 @@ struct Args {
     /// Display mode
     #[arg(short, long, default_value_t)]
     mode: Mode,
+
+    /// Filter out entries from the logs (comma separated)
+    #[arg(short, long)]
+    except: Option<String>,
+
+    /// Only include log entries with these names (comma separated)
+    #[arg(short, long)]
+    only: Option<String>,
+}
+
+fn names_from_arg(arg: Option<String>) -> Option<Vec<String>> {
+    arg.map(|s| s.split(',').map(|s| s.to_string()).collect())
 }
 
 fn main() {
     let args = Args::parse();
 
-    let logs = Logs::new(args.path.as_str());
+    let filter = FilterOpts {
+        only: names_from_arg(args.only),
+        except: names_from_arg(args.except),
+    };
+
+    let logs = Logs::new(args.path.as_str(), filter);
 
     match args.mode {
         Mode::Tui => {
