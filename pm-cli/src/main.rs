@@ -47,6 +47,10 @@ struct Args {
     /// Maximum epoch to display
     #[arg(long)]
     max: Option<usize>,
+
+    /// Maximum span to display from the end of the logs
+    #[arg(long)]
+    span: Option<usize>,
 }
 
 fn names_from_arg(arg: Option<String>) -> Option<Vec<String>> {
@@ -61,6 +65,7 @@ fn main() {
         except: names_from_arg(args.except),
         min: args.min.map(|s| s as f64),
         max: args.max.map(|s| s as f64),
+        span: args.span.map(|s| s as f64),
     };
 
     let logs = Logs::new(args.path.as_str(), filter);

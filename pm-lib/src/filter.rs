@@ -11,6 +11,8 @@ pub struct FilterOpts {
     pub min: Option<f64>,
     /// Maximum epoch to display
     pub max: Option<f64>,
+    /// Maximum span to display (from the end of the logs)
+    pub span: Option<f64>,
 }
 
 impl FilterOpts {
@@ -33,7 +35,20 @@ impl FilterOpts {
     /// Trim the points of a plot based on the min and max values
     /// This function assumes that the points are sorted by epoch, and returns
     /// a subslice of the original points.
+    ///
+    /// The `span` option will take precedence over the `min` and `max` options.
     pub fn trim<'a>(&self, points: &'a [(f64, f64)]) -> &'a [(f64, f64)] {
+        if let Some(span) = self.span {
+            let end = points[points.len() - 1].0;
+            let start_value = end - span;
+
+            let start = points
+                .binary_search_by(|&(epoch, _)| epoch.partial_cmp(&start_value).unwrap())
+                .unwrap_or_else(|x| x);
+
+            return &points[start..];
+        }
+
         let mut start = 0;
         let mut end = points.len();
 
