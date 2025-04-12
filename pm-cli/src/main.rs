@@ -39,6 +39,14 @@ struct Args {
     /// Only include log entries with these names (comma separated)
     #[arg(short, long)]
     only: Option<String>,
+
+    /// Minimum epoch to display
+    #[arg(long)]
+    min: Option<usize>,
+
+    /// Maximum epoch to display
+    #[arg(long)]
+    max: Option<usize>,
 }
 
 fn names_from_arg(arg: Option<String>) -> Option<Vec<String>> {
@@ -51,6 +59,8 @@ fn main() {
     let filter = FilterOpts {
         only: names_from_arg(args.only),
         except: names_from_arg(args.except),
+        min: args.min.map(|s| s as f64),
+        max: args.max.map(|s| s as f64),
     };
 
     let logs = Logs::new(args.path.as_str(), filter);
