@@ -1,7 +1,8 @@
 //! Main application logic
 
-use std::io;
+use std::{io, thread::spawn};
 
+use crossbeam::{channel::Receiver, select};
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use pm_lib::Logs;
 use ratatui::{DefaultTerminal, prelude::*};
@@ -12,11 +13,25 @@ use crate::datasets::draw_datasets;
 pub struct App {
     exit: bool,
     logs: Logs,
+    events: Receiver<io::Result<Event>>,
 }
 
 impl App {
     pub fn new(logs: Logs) -> Self {
-        App { exit: false, logs }
+        let (tx, rx) = crossbeam::channel::unbounded::<io::Result<Event>>();
+
+        // Start a background thread to read crossbeam events
+        spawn(move || {
+            loop {
+                tx.send(event::read()).unwrap();
+            }
+        });
+
+        App {
+            exit: false,
+            logs,
+            events: rx,
+        }
     }
 
     /// Main application loop
@@ -42,7 +57,18 @@ impl App {
 
     /// Crossterm event handling
     fn handle_events(&mut self) -> io::Result<()> {
-        let event = event::read()?;
+        // Block until the next event is received
+        select! {
+            recv(self.logs.updates) -> _ => {},
+            recv(self.events) -> event => {
+            self.handle_crossterm_event(event.unwrap()?);
+            }
+        }
+
+        Ok(())
+    }
+
+    fn handle_crossterm_event(&mut self, event: Event) {
         match event {
             Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
                 match key_event.code {
@@ -59,8 +85,6 @@ impl App {
             }
             _ => {}
         };
-
-        Ok(())
     }
 
     /// App rendering function (as a widget)

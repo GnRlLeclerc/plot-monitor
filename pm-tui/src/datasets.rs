@@ -1,8 +1,10 @@
 //! Convert logs to ratatui datasets for plotting
 
+use std::ffi::OsStr;
+
 use pm_lib::Logs;
 use ratatui::prelude::*;
-use ratatui::widgets::{Block, Borders, Padding, Paragraph};
+use ratatui::widgets::{Block, Padding, Paragraph};
 use ratatui::{
     buffer::Buffer,
     layout::Rect,
@@ -22,6 +24,24 @@ pub fn to_dataset<'a>(name: &'a str, points: &'a [(f64, f64)]) -> Dataset<'a> {
         .data(points)
 }
 
+/// Draw an error message on the given area
+pub fn draw_error(file: &OsStr, msg: &str, rect: Rect, buf: &mut Buffer) {
+    Paragraph::new(msg.bold().red())
+        .alignment(Alignment::Center)
+        .block(
+            Block::default()
+                .padding(Padding {
+                    left: 1,
+                    right: 1,
+                    top: rect.height / 2,
+                    bottom: 0,
+                })
+                .title(file.to_str().unwrap())
+                .title_alignment(Alignment::Center),
+        )
+        .render(rect, buf);
+}
+
 /// Draw datasets on the given area
 pub fn draw_datasets(logs: &Logs, rect: Rect, buf: &mut Buffer) {
     let mut x_min = f64::INFINITY;
@@ -31,30 +51,18 @@ pub fn draw_datasets(logs: &Logs, rect: Rect, buf: &mut Buffer) {
 
     let mut cmap = Colormap::new();
 
-    let datasets = logs.iter();
+    let datasets = logs.lock_iter();
 
     // If the file is not found, just display an error screen
     if datasets.is_none() {
-        Paragraph::new("FILE NOT FOUND".bold().red())
-            .alignment(Alignment::Center)
-            .block(
-                Block::default()
-                    .padding(Padding {
-                        left: 1,
-                        right: 1,
-                        top: rect.height / 2,
-                        bottom: 0,
-                    })
-                    .title(logs.file.clone())
-                    .title_alignment(Alignment::Center),
-            )
-            .render(rect, buf);
+        draw_error(&logs.file.name, "FILE NOT FOUND", rect, buf);
         return;
     }
     let datasets = datasets.unwrap();
 
     // Create datasets
     let datasets = datasets
+        .iter()
         .map(|(name, points)| {
             // Compute bounds
             x_min = x_min.min(points[0].0);
@@ -65,6 +73,11 @@ pub fn draw_datasets(logs: &Logs, rect: Rect, buf: &mut Buffer) {
             return to_dataset(name, points).style(Style::default().fg(cmap.next()));
         })
         .collect::<Vec<_>>();
+
+    if datasets.is_empty() {
+        draw_error(&logs.file.name, "NO DATA", rect, buf);
+        return;
+    }
 
     Chart::new(datasets)
         .x_axis(
@@ -92,7 +105,7 @@ pub fn draw_datasets(logs: &Logs, rect: Rect, buf: &mut Buffer) {
         .block(
             Block::default()
                 .padding(Padding::horizontal(1))
-                .title(logs.file.clone())
+                .title(logs.file.name.to_str().unwrap())
                 .title_alignment(Alignment::Center),
         )
         .render(rect, buf);

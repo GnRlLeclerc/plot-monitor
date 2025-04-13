@@ -68,7 +68,7 @@ fn main() {
         span: args.span.map(|s| s as f64),
     };
 
-    let logs = Logs::new(args.path.as_str(), filter);
+    let logs = Logs::new(&args.path, filter);
 
     match args.mode {
         Mode::Tui => {
