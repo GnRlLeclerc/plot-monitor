@@ -8,9 +8,13 @@ pub struct FilterOpts {
     /// Filter out entries from the logs
     pub except: Option<Vec<String>>,
     /// Minimum epoch to display
-    pub min: Option<f64>,
+    pub min_x: Option<f64>,
     /// Maximum epoch to display
-    pub max: Option<f64>,
+    pub max_x: Option<f64>,
+    /// Maximum value on the y axis (note: only used for display)
+    pub max_y: Option<f64>,
+    /// Minimum value on the y axis (note: only used for display)
+    pub min_y: Option<f64>,
     /// Maximum span to display (from the end of the logs)
     pub span: Option<f64>,
 }
@@ -52,13 +56,13 @@ impl FilterOpts {
         let mut start = 0;
         let mut end = points.len();
 
-        if let Some(min) = self.min {
+        if let Some(min) = self.min_x {
             start = points
                 .binary_search_by(|&(epoch, _)| epoch.partial_cmp(&min).unwrap())
                 .unwrap_or_else(|x| x);
         }
 
-        if let Some(max) = self.max {
+        if let Some(max) = self.max_x {
             end = points
                 .binary_search_by(|&(epoch, _)| epoch.partial_cmp(&max).unwrap())
                 .unwrap_or_else(|x| x);

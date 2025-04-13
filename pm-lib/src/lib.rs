@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
 
 use crossbeam::channel::Receiver;
 use notify::INotifyWatcher;
@@ -21,7 +21,7 @@ pub struct Logs {
     pub file: Arc<Watched>,
 
     /// Filter parameters
-    pub filter: Mutex<FilterOpts>,
+    pub filter: RwLock<FilterOpts>,
 
     /// Channel that notifies when the internal data was updated
     pub updates: Receiver<bool>,

@@ -79,6 +79,17 @@ pub fn draw_datasets(logs: &Logs, rect: Rect, buf: &mut Buffer) {
         return;
     }
 
+    {
+        let filters = logs.filter.read().unwrap();
+        if let Some(min) = filters.min_y {
+            y_min = min;
+        }
+
+        if let Some(max) = filters.max_y {
+            y_max = max;
+        }
+    }
+
     Chart::new(datasets)
         .x_axis(
             Axis::default()

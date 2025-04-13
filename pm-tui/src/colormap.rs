@@ -4,9 +4,9 @@ use ratatui::prelude::Color;
 
 /// Valid colors for the colormap
 static COLORS: [Color; 6] = [
-    Color::Red,
-    Color::Green,
     Color::Blue,
+    Color::Green,
+    Color::Red,
     Color::Yellow,
     Color::Magenta,
     Color::Cyan,

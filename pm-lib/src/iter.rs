@@ -1,6 +1,9 @@
 //! Implement iterators for the logs, based on the internal filters
 
-use std::{collections::HashMap, sync::MutexGuard};
+use std::{
+    collections::HashMap,
+    sync::{MutexGuard, RwLockReadGuard},
+};
 
 use crate::{FilterOpts, Logs};
 
@@ -8,7 +11,7 @@ use crate::{FilterOpts, Logs};
 /// It must hold mutex guards for both the points and the filter during iteration.
 pub struct LogsIterable<'a> {
     points: MutexGuard<'a, Option<HashMap<String, Vec<(f64, f64)>>>>,
-    filter: MutexGuard<'a, FilterOpts>,
+    filter: RwLockReadGuard<'a, FilterOpts>,
 }
 
 impl Logs {
@@ -21,7 +24,7 @@ impl Logs {
             return None;
         }
 
-        let filter = self.filter.lock().unwrap();
+        let filter = self.filter.read().unwrap();
 
         Some(LogsIterable { points, filter })
     }

@@ -42,11 +42,21 @@ struct Args {
 
     /// Minimum epoch to display
     #[arg(long)]
-    min: Option<usize>,
+    min_epoch: Option<usize>,
 
     /// Maximum epoch to display
     #[arg(long)]
-    max: Option<usize>,
+    max_epoch: Option<usize>,
+
+    /// Maximum value on the y axis
+    /// By default, the maximum value will be calculated from the data
+    #[arg(long)]
+    max: Option<f64>,
+
+    /// Minimum value on the y axis
+    /// By default, the minimum value will be calculated from the data
+    #[arg(long)]
+    min: Option<f64>,
 
     /// Maximum span to display from the end of the logs
     #[arg(long)]
@@ -63,8 +73,10 @@ fn main() {
     let filter = FilterOpts {
         only: names_from_arg(args.only),
         except: names_from_arg(args.except),
-        min: args.min.map(|s| s as f64),
-        max: args.max.map(|s| s as f64),
+        min_x: args.min_epoch.map(|s| s as f64),
+        max_x: args.max_epoch.map(|s| s as f64),
+        max_y: args.max,
+        min_y: args.min,
         span: args.span.map(|s| s as f64),
     };
 
